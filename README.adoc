@@ -1,0 +1,10 @@
+= Test Automation Platform - Test Case Service
+
+This application is providing test case micro service.
+
+* Build on Spring Boot
+* H2 database
+
+== How to use
+http://127.0.0.1:9090/browser.html
+http://127.0.0.1:9090/h2-console
