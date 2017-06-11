@@ -13,6 +13,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -33,10 +34,12 @@ public class GatewayController {
     private GatewayService gatewayService;
     @Autowired
     private AuthService authService;
+    @Value("${tap-authentication-enabled}")
+    private boolean authenticationEnabled;
 
     @RequestMapping("/**")
     public ResponseEntity<?> getResponse(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if(!isAuthorized(req)) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if(!isAuthenticated(req)) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         CloseableHttpResponse httpResponse = (CloseableHttpResponse) gatewayService.getResponse(req, resp);
         IOUtils.closeQuietly(req.getInputStream());
@@ -46,7 +49,8 @@ public class GatewayController {
         return new ResponseEntity<Object>(response, HttpStatus.valueOf(httpResponse.getStatusLine().getStatusCode()));
     }
 
-    private boolean isAuthorized(HttpServletRequest req){
+    private boolean isAuthenticated(HttpServletRequest req){
+        if(!authenticationEnabled) return true;
         Enumeration<String> headerNameEnum = req.getHeaderNames();
         String userName = null, token = null;
         while(headerNameEnum.hasMoreElements()){
