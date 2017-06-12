@@ -13,7 +13,7 @@ import com.xieziming.tap.gateway.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.ehcache.EhCacheCacheManager;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +21,7 @@ import java.util.UUID;
 /**
  * Created by Suny on 7/6/16.
  */
-@Component
+@Service
 @Slf4j
 public class AuthServiceImpl implements AuthService {
     @Autowired

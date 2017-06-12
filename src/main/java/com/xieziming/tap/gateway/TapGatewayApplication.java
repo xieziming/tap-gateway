@@ -22,8 +22,11 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
 
 /**
  * Application configuration file.
@@ -31,6 +34,7 @@ import org.springframework.context.annotation.Bean;
  * @author Suny Xie
  */
 @SpringBootApplication
+@ServletComponentScan
 @EnableCaching
 public class TapGatewayApplication {
 	@Bean
@@ -42,6 +46,13 @@ public class TapGatewayApplication {
 		pcm.setDefaultMaxPerRoute(50);
 		pcm.setMaxTotal(50);
 		return pcm;
+	}
+
+	@Bean
+	public FilterRegistrationBean filterRegistrationBean(HiddenHttpMethodFilter filter){
+		FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(filter);
+		filterRegistrationBean.setEnabled(false);
+		return filterRegistrationBean;
 	}
 
 	public static void main(String[] args) {

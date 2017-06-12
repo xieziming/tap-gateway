@@ -7,6 +7,7 @@
 package com.xieziming.tap.gateway.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.InputStreamEntity;
@@ -15,7 +16,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,7 +26,7 @@ import java.util.Enumeration;
 /**
  * Created by Suny on 7/6/16.
  */
-@Component
+@Service
 @Slf4j
 public class GatewayServiceImpl implements GatewayService{
     @Autowired
@@ -37,13 +38,11 @@ public class GatewayServiceImpl implements GatewayService{
     @Value("${tap-execution-service-url}")
     private String executionServiceUrl;
 
-    public static final String TEST_CASE_PATTERN = "/tap-testcase/";
-    public static final String EXECUTION_PATTERN = "/tap-execution/";
+    @Value("${tap-testcase-service-pattern}")
+    private String TEST_CASE_PATTERN;
 
-    @Autowired
-    public GatewayServiceImpl(PoolingHttpClientConnectionManager pcm){
-        this.pcm = pcm;
-    }
+    @Value("${tap-execution-service-pattern}")
+    private String EXECUTION_PATTERN;
 
     private String getRouteredUrl(HttpServletRequest req) {
         String queryString = req.getQueryString() == null ? "" : "?" + req.getQueryString();
@@ -67,13 +66,16 @@ public class GatewayServiceImpl implements GatewayService{
         HttpRequestBase httpRequest = getImplBaseMethod(req.getMethod(), url);
 
         if(httpRequest instanceof HttpPost){
-            ((HttpPost) httpRequest).setEntity(new InputStreamEntity(req.getInputStream()));
+            InputStreamEntity inputStreamEntity = new InputStreamEntity(req.getInputStream());
+            ((HttpPost) httpRequest).setEntity(inputStreamEntity);
         }
 
         addHeaders(httpRequest, req);
+
         log.info("forward request to "+ url);
 
         try(CloseableHttpClient httpClient = buildClient()){
+
             CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);
             if(httpResponse.getEntity().getContentType() != null){
                 resp.setContentType(httpResponse.getEntity().getContentType().getValue());
@@ -106,9 +108,10 @@ public class GatewayServiceImpl implements GatewayService{
     }
 
     private CloseableHttpClient buildClient(){
+        HttpHost httpHost = new HttpHost("127.0.0.1",8888);
         return HttpClientBuilder.create()
                 .setConnectionManager(pcm)
-                .setConnectionManagerShared(true)
+                .setConnectionManagerShared(true).setProxy(httpHost)
                 .build();
     }
 }

@@ -8,10 +8,9 @@ package com.xieziming.tap.gateway.controller;
 
 import com.xieziming.tap.gateway.service.AuthService;
 import com.xieziming.tap.gateway.service.GatewayService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -28,12 +27,14 @@ import java.util.Enumeration;
  * Created by Suny on 7/5/16.
  */
 @Controller
+@Slf4j
 public class GatewayController {
-    private static final Logger logger = LoggerFactory.getLogger(GatewayController.class);
     @Autowired
     private GatewayService gatewayService;
+
     @Autowired
     private AuthService authService;
+
     @Value("${tap-authentication-enabled}")
     private boolean authenticationEnabled;
 
